@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>BookMyShow</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+
+	<body>
+		<div class="container">
+			<div class="head">
+				<div class="left-nav">
+					<img src="logo.png" class="logo" alt="">
+					<button class="active">comming soon</button>
+					<button>now showing</button>
+				</div>
+				<div class="right-nav">
+					<div class="dropdown">Popular</div>
+					<div class="dropdown">English</div>
+					<div class="dropdown">All Geners</div>
+				</div>
+			</div>
+			<div class="body">
+				<div class="filter">
+					<label for="Applied Filters">Applied Filters:</label>
+					<span class="tag">English</span>
+				</div>
+				<div class="card-body" id="card-body">
+					
+				</div>
+			</div>
+		</div>
+	</body>
+
+	<script src="data.js"></script>
+	<script>
+		(function(){
+			let innerHTML = '<div class="videoDiv hidden" id="row_0"></div><div class="row">';
+			let cardBody = document.getElementById('card-body');
+			let row = 0;
+			Object.keys(data[1]).forEach((x,y)=>{
+				let date = new Date(data[1][x].ShowDate);
+				if(y > 0  && y % 6 == 0){
+					row++;
+				}
+				let ele = `
+				${  y > 0 && 
+					y %6 == 0 ? `</div>
+									<div class="videoDiv hidden" id="row_${row}">
+									</div>
+									<div class="row">
+								` :'' }
+
+				<div class="card" onClick="showTrailer('${x}',${row})">
+					<span class="show-date">${ y %2 == 0?`${date.toLocaleString('en-US',{month:'short'})}<br>${date.getDate()}` : `${date.getDate()}<br>${date.toLocaleString('en-US',{month:'short'})} `}</span>
+					<div class="img">
+						<img src="https://in.bmscdn.com/events/moviecard/${x}.jpg" alt="">
+					</div>
+					<div class="footer">
+						<label for="title">
+							${data[1][x]['EventTitle']}
+						</label>
+					</div>
+				</div>`;
+
+				innerHTML += ele;
+			});
+
+			innerHTML += '</div>';
+			cardBody.innerHTML += innerHTML;
+		})();
+		function showTrailer(idx,rowId){
+			let obj = data[1][idx];
+			let old = document.getElementsByClassName('videoDiv active')[0];
+			if(old){
+				old.classList.remove('active');
+				old.classList.add('hidden');
+			}
+			let date = new Date(obj.ShowDate);
+			let key = obj.TrailerURL.split("v=")[1].split('&')[0];
+			let url = `https://www.youtube.com/embed/${key}`;
+			let videoDiv = `
+						<iframe src="${url}" frameborder="0" allowfullscreen></iframe>
+						<div>
+							<div class="row head">
+								<h3>${obj.EventTitle}</h3>
+								<p>${obj.EventLanguage}</p>
+							</div>
+							<div class="tags">
+								${obj.EventGenre.split('|').map(x=>{
+									return `<span class="tag">${x}</span>`;
+								})}
+							</div>
+							<div class="row">
+								<div class="col vote">
+									<img src="hand.png" alt="likes" >
+									<div class="">
+										<span>${obj.avgRating}%</span>
+										<span>${obj.totalVotes} votes</span>
+									</div>
+								</div>
+								<div class="col vote">
+									<img src="calender.png" alt="">
+									<div><span>${date.getDate()} ${date.toLocaleString('en-US',{month:'short'})} </span><span> ${date.getFullYear()} </span></div>
+								</div>
+							</div>
+							<div class="row">
+								<p>${obj.EventName}</p>
+							</div>
+							<div class="row">
+								<a href="#">Read More</a>
+							</div>
+							<div class="footer">
+								<div class="like">
+									<img src="thumbs-up.png" alt="">
+									<p>(${obj.wtsCount})</p>
+								</div>
+								<div class="maybe">
+									<img src="questionmark_orange.png" alt="">
+									<p>(${obj.maybeCount})</p>
+								</div>
+								<div class="dislike">
+									<img src="thumbs-down.png" class="reverse" alt="">
+									<p>(${obj.dwtsCount})</p>
+								</div>
+							</div>
+						</div>`;
+			document.getElementById(`row_${rowId}`).innerHTML = videoDiv;
+			document.getElementById(`row_${rowId}`).classList.remove('hidden');
+			document.getElementById(`row_${rowId}`).classList.add('active');
+			document.getElementById(`row_${rowId}`).scrollIntoView();
+		}
+	</script>
+</html>
